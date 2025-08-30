@@ -1,8 +1,8 @@
 """add search_vector for fulltext search
 
-Revision ID: 2e2d44720bd7
-Revises: fe0a6206765c
-Create Date: 2025-08-30 17:17:36.067609
+Revision ID: b923ceb6b949
+Revises: 9a4cec966178
+Create Date: 2025-08-30 20:04:20.999973
 
 """
 from typing import Sequence, Union
@@ -12,14 +12,12 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '2e2d44720bd7'
-down_revision: Union[str, None] = 'fe0a6206765c'
+revision: str = 'b923ceb6b949'
+down_revision: Union[str, None] = '9a4cec966178'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-
 def upgrade() -> None:
-    # Функция обновления search_vector
     op.execute("""
     CREATE FUNCTION recipes_search_vector_update() RETURNS trigger AS $$
     BEGIN

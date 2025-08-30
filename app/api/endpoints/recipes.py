@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from typing import List, Optional
 
 from app.api.schemas.recipe import RecipeCreate, RecipeUpdate, RecipeOut
 from app.services.recipe_service import RecipeService
@@ -63,7 +62,7 @@ async def delete_recipe(
     return {"status": "deleted"}
 
 
-@router.get("/filter/", response_model=List[RecipeOut])
+@router.get("/filter/", response_model=list[RecipeOut])
 async def filter_recipes(
     include: list[str]|None = Query(None),
     exclude: list[str]|None = Query(None),
@@ -71,7 +70,7 @@ async def filter_recipes(
 ):
     return await service.filter_by_ingredients(include=include, exclude=exclude)
 
-@router.get("/search/", response_model=List[RecipeOut])
+@router.get("/search/", response_model=list[RecipeOut])
 async def search_recipes(
     q: str = Query(..., description="Natural language query"),
     service: RecipeService = Depends(get_service),

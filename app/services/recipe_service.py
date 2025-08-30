@@ -1,5 +1,4 @@
 from app.api.schemas.recipe import RecipeCreate, RecipeUpdate, RecipeOut
-from app.db.models import Recipe
 from app.utils.unitofwork import UnitOfWork
 
 
@@ -9,28 +8,28 @@ class RecipeService:
 
     async def create_recipe(self, data: RecipeCreate) -> RecipeOut:
         async with self.uow as uow:
-            recipe = await uow.recipies.create(data)
+            recipe = await uow.recipies.create(data.model_dump())
             await uow.commit()
-            return RecipeOut.model_validate(recipe)
+            return RecipeOut.model_validate(recipe, from_attributes=True)
 
     async def get_recipe(self, recipe_id: int) -> RecipeOut | None:
         async with self.uow as uow:
             recipe = await uow.recipies.get(recipe_id)
             if recipe:
-                return RecipeOut.model_validate(recipe)
+                return RecipeOut.model_validate(recipe, from_attributes=True)
             return None
 
     async def list_recipes(self, skip: int = 0, limit: int = 20) -> list[RecipeOut]:
         async with self.uow as uow:
-            recipes = await uow.recipies.list(skip=skip, limit=limit)
-            return [RecipeOut.model_validate(r) for r in recipes]
+            recipes = await uow.recipies.get_list(skip=skip, limit=limit)
+            return [RecipeOut.model_validate(r, from_attributes=True) for r in recipes]
 
     async def update_recipe(self, recipe_id: int, data: RecipeUpdate) -> RecipeOut | None:
         async with self.uow as uow:
-            recipe = await uow.recipies.update(recipe_id, data)
+            recipe = await uow.recipies.update(recipe_id, data.model_dump(exclude_unset=True))
             if recipe:
                 await uow.commit()
-                return RecipeOut.model_validate(recipe)
+                return RecipeOut.model_validate(recipe, from_attributes=True)
             return None
 
     async def delete_recipe(self, recipe_id: int) -> bool:
@@ -47,9 +46,9 @@ class RecipeService:
     ) -> list[RecipeOut]:
         async with self.uow as uow:
             recipes = await uow.recipies.filter_by_ingredients(include, exclude)
-            return [RecipeOut.model_validate(r) for r in recipes]
+            return [RecipeOut.model_validate(r, from_attributes=True) for r in recipes]
 
     async def search(self, query: str) -> list[RecipeOut]:
         async with self.uow as uow:
             recipes = await uow.recipies.fulltext_search(query)
-            return [RecipeOut.model_validate(r) for r in recipes]
+            return [RecipeOut.model_validate(r, from_attributes=True) for r in recipes]
