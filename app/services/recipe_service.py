@@ -2,12 +2,15 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
 from app.api.schemas.recipe import RecipeCreate, RecipeUpdate, RecipeOut
+from app.utils.nl_query_parser import parse_natural_query
+from app.utils.openai_parser import OpenAIQueryParser
 from app.utils.unitofwork import UnitOfWork
 
 
 class RecipeService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
+        self.parser = OpenAIQueryParser()
 
     async def create_recipe(self, data: RecipeCreate) -> RecipeOut:
         async with self.uow as uow:
@@ -59,6 +62,13 @@ class RecipeService:
             return [RecipeOut.model_validate(r, from_attributes=True) for r in recipes]
 
     async def search(self, query: str) -> list[RecipeOut]:
+        parsed_query = parse_natural_query(query)
         async with self.uow as uow:
-            recipes = await uow.recipies.fulltext_search(query)
+            recipes = await uow.recipies.fulltext_search(parsed_query)
+            return [RecipeOut.model_validate(r, from_attributes=True) for r in recipes]
+
+    async def smart_search(self, query: str) -> list[RecipeOut]:
+        parsed_query = await self.parser.parse(query)
+        async with self.uow as uow:
+            recipes = await uow.recipies.fulltext_search(parsed_query)
             return [RecipeOut.model_validate(r, from_attributes=True) for r in recipes]

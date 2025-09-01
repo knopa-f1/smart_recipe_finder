@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.schemas.recipe import RecipeCreate, RecipeUpdate, RecipeOut
+from app.core.config import settings
 from app.services.recipe_service import RecipeService
 from app.utils.unitofwork import UnitOfWork
 
@@ -76,3 +77,15 @@ async def search_recipes(
     service: RecipeService = Depends(get_service),
 ):
     return await service.search(q)
+
+@router.get("/smart_search/", response_model=list[RecipeOut])
+async def smart_search(
+        q: str = Query(..., description="Natural language query"),
+        service: RecipeService = Depends(get_service)):
+    if not settings.OPENAI_API_KEY:
+        raise HTTPException(
+            status_code=503,
+            detail="OpenAI API key is not configured. Smart search is unavailable."
+        )
+    return await service.smart_search(q)
+

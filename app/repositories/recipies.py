@@ -26,24 +26,23 @@ class RecipeRepository(BaseRepository):
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def fulltext_search(self, query_str: str)-> list[Recipe]:
-        parsed = parse_natural_query(query_str)
+    async def fulltext_search(self, parsed_query: dict)-> list[Recipe]:
         query = select(Recipe)
 
-        if parsed.get("fts"):
+        if parsed_query.get("fts"):
             query = query.where(
-                Recipe.search_vector.op("@@")(func.plainto_tsquery("english", parsed["fts"]))
+                Recipe.search_vector.op("@@")(func.plainto_tsquery("english", parsed_query["fts"]))
             )
 
         # cooking_time
-        if parsed.get("cooking_time"):
-            limit = parsed["cooking_time"].get("lte")
+        if parsed_query.get("cooking_time"):
+            limit = parsed_query["cooking_time"].get("lte")
             if limit:
                 query = query.where(Recipe.cooking_time <= limit)
 
         # difficulty
-        if parsed.get("difficulty"):
-            query = query.where(Recipe.difficulty == parsed["difficulty"])
+        if parsed_query.get("difficulty"):
+            query = query.where(Recipe.difficulty == parsed_query["difficulty"])
 
         result = await self.session.execute(query)
         return result.scalars().all()

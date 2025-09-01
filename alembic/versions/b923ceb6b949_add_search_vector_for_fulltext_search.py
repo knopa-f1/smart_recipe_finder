@@ -25,7 +25,7 @@ def upgrade() -> None:
         setweight(to_tsvector('english', coalesce(NEW.title, '')), 'A') ||
         setweight(to_tsvector('english', coalesce(array_to_string(NEW.ingredients, ' '), '')), 'A') ||
         setweight(to_tsvector('english', coalesce(NEW.instructions, '')), 'B') ||
-        setweight(to_tsvector('english', coalesce(NEW.cuisine, '')), 'C') ||
+        setweight(to_tsvector('english', coalesce(NEW.cuisine, '')), 'B') ||
         setweight(to_tsvector('english', coalesce(NEW.difficulty::text, '')), 'C') ||
         setweight(to_tsvector('english', coalesce(array_to_string(NEW.tags, ' '), '')), 'C');
       RETURN NEW;
