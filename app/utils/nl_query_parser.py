@@ -1,11 +1,15 @@
 import spacy
 
+from app.core.logger import logger
+
 nlp = spacy.load("en_core_web_sm")
 
 CUSTOM_STOPWORDS = {"less", "under", "with", "minute", "minutes", "recipe", "recipes"}
 
 
 def parse_natural_query(text: str) -> dict:
+    logger.info("Parsing natural query: '%s'", text)
+
     doc = nlp(text.lower())
     filters = {}
     keywords = []
@@ -36,7 +40,10 @@ def parse_natural_query(text: str) -> dict:
         if token.is_alpha:
             keywords.append(token.lemma_)
 
-    return {
+    parsed = {
         "fts": " ".join(keywords),
         **filters
     }
+
+    logger.info("Parsed natural query result: %s", parsed)
+    return parsed

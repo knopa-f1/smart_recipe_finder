@@ -3,11 +3,16 @@ import json
 from openai import AsyncOpenAI
 
 from app.core.config import settings
+from app.core.logger import logger
 
 
 class OpenAIQueryParser:
     def __init__(self, api_key: str | None = None, model: str = "gpt-5"):
-        self.client = AsyncOpenAI(api_key=api_key or settings.OPENAI_API_KEY)
+        if not settings.OPENAI_API_KEY:
+            logger.warning("OpenAI API key is not set. Smart search will not work.")
+            self.client = None
+        else:
+            self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self.model = model
 
     @staticmethod
@@ -51,6 +56,11 @@ class OpenAIQueryParser:
         """
 
     async def parse(self, query: str) -> dict:
+        if not self.client:
+            logger.error("OpenAI client not initialized: missing API key")
+            raise RuntimeError("OpenAI API key not configured")
+
+        logger.info("Sending query to OpenAI: %s", query)
         response = await self.client.chat.completions.create(
             model=self.model,
             messages=[
@@ -61,6 +71,7 @@ class OpenAIQueryParser:
         )
 
         raw = response.choices[0].message.content.strip()
+        logger.info("OpenAI response: %s", raw)
         try:
             return json.loads(raw)
         except json.JSONDecodeError:
