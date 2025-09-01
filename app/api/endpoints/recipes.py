@@ -39,7 +39,7 @@ async def list_recipes(
     return await service.list_recipes(skip=skip, limit=limit)
 
 
-@router.put("/{recipe_id}", response_model=RecipeOut)
+@router.patch("/{recipe_id}", response_model=RecipeOut)
 async def update_recipe(
     recipe_id: int,
     recipe_in: RecipeUpdate,

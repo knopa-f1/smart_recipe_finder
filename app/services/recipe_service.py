@@ -1,3 +1,6 @@
+from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
+
 from app.api.schemas.recipe import RecipeCreate, RecipeUpdate, RecipeOut
 from app.utils.unitofwork import UnitOfWork
 
@@ -8,9 +11,16 @@ class RecipeService:
 
     async def create_recipe(self, data: RecipeCreate) -> RecipeOut:
         async with self.uow as uow:
-            recipe = await uow.recipies.create(data.model_dump())
-            await uow.commit()
-            return RecipeOut.model_validate(recipe, from_attributes=True)
+            try:
+                recipe = await uow.recipies.create(data.model_dump())
+                await uow.commit()
+                return RecipeOut.model_validate(recipe, from_attributes=True)
+            except IntegrityError:
+                await uow.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Recipe with this title and cuisine already exists",
+                )
 
     async def get_recipe(self, recipe_id: int) -> RecipeOut | None:
         async with self.uow as uow:

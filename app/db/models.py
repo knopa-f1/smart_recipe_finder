@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Enum, ARRAY, Index
+from sqlalchemy import Column, Integer, String, Text, Enum, ARRAY, Index, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column
 from app.api.schemas.enums import Difficulty
@@ -19,3 +19,7 @@ class Recipe(Base): # pylint: disable=too-few-public-methods
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True)
 
     search_vector: Mapped[str] = mapped_column(TSVECTOR)
+
+    __table_args__ = (
+        UniqueConstraint("title", "cuisine", name="uq_recipe_title_cuisine"),
+    )

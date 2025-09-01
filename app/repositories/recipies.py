@@ -4,6 +4,7 @@ from app.db.models import Recipe
 from app.api.schemas.recipe import RecipeCreate, RecipeUpdate
 from app.repositories.base import BaseRepository
 
+from app.utils.nl_query_parser import parse_natural_query
 
 class RecipeRepository(BaseRepository):
     model = Recipe
@@ -25,9 +26,24 @@ class RecipeRepository(BaseRepository):
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def fulltext_search(self, query_str: str) -> list[Recipe]:
-        query = select(Recipe).where(
-            Recipe.search_vector.op("@@")(func.plainto_tsquery("english", query_str))
-        )
+    async def fulltext_search(self, query_str: str)-> list[Recipe]:
+        parsed = parse_natural_query(query_str)
+        query = select(Recipe)
+
+        if parsed.get("fts"):
+            query = query.where(
+                Recipe.search_vector.op("@@")(func.plainto_tsquery("english", parsed["fts"]))
+            )
+
+        # cooking_time
+        if parsed.get("cooking_time"):
+            limit = parsed["cooking_time"].get("lte")
+            if limit:
+                query = query.where(Recipe.cooking_time <= limit)
+
+        # difficulty
+        if parsed.get("difficulty"):
+            query = query.where(Recipe.difficulty == parsed["difficulty"])
+
         result = await self.session.execute(query)
         return result.scalars().all()

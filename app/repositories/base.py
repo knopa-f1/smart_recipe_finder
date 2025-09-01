@@ -37,9 +37,12 @@ class BaseRepository:
         await self.session.flush()
         return await self.get(instance_id)
 
-    async def delete(self, instance_id: int):
+    async def delete(self, instance_id: int)->bool:
         instance = await self.get(instance_id)
         if instance:
             await self.session.delete(instance)
             await self.session.flush()
+            return True
+        else:
+            return False
 
