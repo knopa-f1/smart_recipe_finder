@@ -2,6 +2,7 @@ from app.db.database import async_session_maker
 
 from app.repositories.recipies import RecipeRepository
 
+
 class UnitOfWork:
     def __init__(self, session_factory=None):
         if session_factory is None:

@@ -4,6 +4,7 @@ nlp = spacy.load("en_core_web_sm")
 
 CUSTOM_STOPWORDS = {"less", "under", "with", "minute", "minutes", "recipe", "recipes"}
 
+
 def parse_natural_query(text: str) -> dict:
     doc = nlp(text.lower())
     filters = {}

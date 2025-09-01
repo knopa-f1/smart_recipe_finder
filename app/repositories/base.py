@@ -1,7 +1,5 @@
-from sqlalchemy import select, update, delete, func
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models import Recipe
-from app.api.schemas.recipe import RecipeCreate, RecipeUpdate
 
 
 class BaseRepository:
@@ -37,7 +35,7 @@ class BaseRepository:
         await self.session.flush()
         return await self.get(instance_id)
 
-    async def delete(self, instance_id: int)->bool:
+    async def delete(self, instance_id: int) -> bool:
         instance = await self.get(instance_id)
         if instance:
             await self.session.delete(instance)
@@ -45,4 +43,3 @@ class BaseRepository:
             return True
         else:
             return False
-

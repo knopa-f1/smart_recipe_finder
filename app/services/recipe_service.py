@@ -53,9 +53,9 @@ class RecipeService:
             return deleted
 
     async def filter_by_ingredients(
-        self,
-        include: list[str] | None = None,
-        exclude: list[str] | None = None,
+            self,
+            include: list[str] | None = None,
+            exclude: list[str] | None = None,
     ) -> list[RecipeOut]:
         async with self.uow as uow:
             recipes = await uow.recipies.filter_by_ingredients(include, exclude)

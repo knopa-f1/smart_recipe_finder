@@ -1,18 +1,16 @@
-from sqlalchemy import select, update, delete, func
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, func
+
 from app.db.models import Recipe
-from app.api.schemas.recipe import RecipeCreate, RecipeUpdate
 from app.repositories.base import BaseRepository
 
-from app.utils.nl_query_parser import parse_natural_query
 
 class RecipeRepository(BaseRepository):
     model = Recipe
 
     async def filter_by_ingredients(
-        self,
-        include: list[str] | None = None,
-        exclude: list[str] | None = None,
+            self,
+            include: list[str] | None = None,
+            exclude: list[str] | None = None,
     ) -> list[Recipe]:
         query = select(Recipe)
 
@@ -26,7 +24,7 @@ class RecipeRepository(BaseRepository):
         result = await self.session.execute(query)
         return result.scalars().all()
 
-    async def fulltext_search(self, parsed_query: dict)-> list[Recipe]:
+    async def fulltext_search(self, parsed_query: dict) -> list[Recipe]:
         query = select(Recipe)
 
         if parsed_query.get("fts"):

@@ -14,16 +14,16 @@ def get_service() -> RecipeService:
 
 @router.post("/", response_model=RecipeOut)
 async def create_recipe(
-    recipe_in: RecipeCreate,
-    service: RecipeService = Depends(get_service),
+        recipe_in: RecipeCreate,
+        service: RecipeService = Depends(get_service),
 ):
     return await service.create_recipe(recipe_in)
 
 
 @router.get("/{recipe_id}", response_model=RecipeOut)
 async def get_recipe(
-    recipe_id: int,
-    service: RecipeService = Depends(get_service),
+        recipe_id: int,
+        service: RecipeService = Depends(get_service),
 ):
     recipe = await service.get_recipe(recipe_id)
     if not recipe:
@@ -33,18 +33,18 @@ async def get_recipe(
 
 @router.get("/", response_model=list[RecipeOut])
 async def list_recipes(
-    skip: int = 0,
-    limit: int = 20,
-    service: RecipeService = Depends(get_service),
+        skip: int = 0,
+        limit: int = 20,
+        service: RecipeService = Depends(get_service),
 ):
     return await service.list_recipes(skip=skip, limit=limit)
 
 
 @router.patch("/{recipe_id}", response_model=RecipeOut)
 async def update_recipe(
-    recipe_id: int,
-    recipe_in: RecipeUpdate,
-    service: RecipeService = Depends(get_service),
+        recipe_id: int,
+        recipe_in: RecipeUpdate,
+        service: RecipeService = Depends(get_service),
 ):
     recipe = await service.update_recipe(recipe_id, recipe_in)
     if not recipe:
@@ -54,8 +54,8 @@ async def update_recipe(
 
 @router.delete("/{recipe_id}")
 async def delete_recipe(
-    recipe_id: int,
-    service: RecipeService = Depends(get_service),
+        recipe_id: int,
+        service: RecipeService = Depends(get_service),
 ):
     deleted = await service.delete_recipe(recipe_id)
     if not deleted:
@@ -65,18 +65,20 @@ async def delete_recipe(
 
 @router.get("/filter/", response_model=list[RecipeOut])
 async def filter_recipes(
-    include: list[str]|None = Query(None),
-    exclude: list[str]|None = Query(None),
-    service: RecipeService = Depends(get_service),
+        include: list[str] | None = Query(None),
+        exclude: list[str] | None = Query(None),
+        service: RecipeService = Depends(get_service),
 ):
     return await service.filter_by_ingredients(include=include, exclude=exclude)
 
+
 @router.get("/search/", response_model=list[RecipeOut])
 async def search_recipes(
-    q: str = Query(..., description="Natural language query"),
-    service: RecipeService = Depends(get_service),
+        q: str = Query(..., description="Natural language query"),
+        service: RecipeService = Depends(get_service),
 ):
     return await service.search(q)
+
 
 @router.get("/smart_search/", response_model=list[RecipeOut])
 async def smart_search(
@@ -88,4 +90,3 @@ async def smart_search(
             detail="OpenAI API key is not configured. Smart search is unavailable."
         )
     return await service.smart_search(q)
-

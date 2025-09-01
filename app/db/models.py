@@ -1,12 +1,12 @@
-from sqlalchemy import Column, Integer, String, Text, Enum, ARRAY, Index, UniqueConstraint
-from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
-from sqlalchemy.orm import declarative_base, Mapped, mapped_column
+from sqlalchemy import Integer, String, Text, Enum, ARRAY, UniqueConstraint
+from sqlalchemy.dialects.postgresql import TSVECTOR
+from sqlalchemy.orm import Mapped, mapped_column
+
 from app.api.schemas.enums import Difficulty
-from app.api.schemas.recipe import RecipeOut
 from app.db.database import Base
 
 
-class Recipe(Base): # pylint: disable=too-few-public-methods
+class Recipe(Base):  # pylint: disable=too-few-public-methods
     __tablename__ = "recipes"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
