@@ -19,7 +19,13 @@ def parse_natural_query(text: str) -> dict:
         if token.like_num:
             next_token = doc[token.i + 1] if token.i + 1 < len(doc) else None
             if next_token and next_token.text in {"minute", "minutes"}:
-                filters["cooking_time"] = {"lte": int(token.text)}
+                prev_token = doc[token.i - 1] if token.i - 1 >= 0 else None
+                if prev_token and prev_token.lemma_ in {"more", "over", "longer"}:
+                    filters["cooking_time"] = {"gte": int(token.text)}
+                elif prev_token and prev_token.text == "least":
+                    filters["cooking_time"] = {"gte": int(token.text)}
+                else:
+                    filters["cooking_time"] = {"lte": int(token.text)}
                 continue
 
         # difficulty

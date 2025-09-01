@@ -50,7 +50,7 @@ class OpenAIQueryParser:
         Return **only valid JSON** with this structure:
         {{
             "fts": "<fts string for postgres full-text search>",
-            "cooking_time": {{"lte": <int>}} OR null,
+            "cooking_time": {{"lte" OR "gte": <int>}} OR null,
             "difficulty": "<easy|medium|hard>" OR null
         }}
         """

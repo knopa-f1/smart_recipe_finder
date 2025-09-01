@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     DB_PASS: str
     DB_NAME: str
 
-    OPENAI_API_KEY: str
+    OPENAI_API_KEY: str | None = None
 
     @property
     def ASYNC_DATABASE_URL(self):
