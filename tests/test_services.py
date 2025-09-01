@@ -1,9 +1,7 @@
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.recipe_service import RecipeService
 from app.api.schemas.recipe import RecipeCreate, RecipeUpdate
 from app.api.schemas.enums import Difficulty
-from app.utils.unitofwork import UnitOfWork
 from app.utils.openai_parser import OpenAIQueryParser
 
 @pytest.mark.asyncio
@@ -106,7 +104,5 @@ async def test_smart_search(monkeypatch, recipe_service: RecipeService, query, e
     monkeypatch.setattr(OpenAIQueryParser, "parse", fake_parse)
 
     results = await recipe_service.smart_search(query)
-    print("ЛОГ",results)
-    print("ЛОГ", await recipe_service.list_recipes())
     titles = [r.title for r in results]
     assert expected in titles

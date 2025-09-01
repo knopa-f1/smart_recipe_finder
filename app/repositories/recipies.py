@@ -16,10 +16,10 @@ class RecipeRepository(BaseRepository):
 
         if include:
             for ingredient in include:
-                query = query.where(func.array_position(Recipe.ingredients, ingredient) != None)
+                query = query.where(func.array_position(Recipe.ingredients, ingredient) is not None)
         if exclude:
             for ingredient in exclude:
-                query = query.where(func.array_position(Recipe.ingredients, ingredient) == None)
+                query = query.where(func.array_position(Recipe.ingredients, ingredient) is None)
 
         result = await self.session.execute(query)
         return result.scalars().all()

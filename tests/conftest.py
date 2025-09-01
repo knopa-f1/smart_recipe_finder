@@ -1,17 +1,13 @@
-import asyncio
+import subprocess
 import os
 import uuid
 import pytest
 import pytest_asyncio
-import subprocess
 import psycopg2
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from app.api.endpoints.recipes import get_service
 from app.services.recipe_service import RecipeService
 from app.utils.unitofwork import UnitOfWork
-from main import app
 from app.core.config import settings
 
 TEST_DB_NAME = f"{settings.DB_NAME}_test_{uuid.uuid4().hex[:6]}"
@@ -87,18 +83,11 @@ def test_database():
 
 
 @pytest_asyncio.fixture(scope="session")
-async def engine(test_database):
+async def engine():
     engine = create_async_engine(ASYNC_DATABASE_URL, future=True)
     yield engine
     await engine.dispose()
 
-
-@pytest_asyncio.fixture
-async def db_session(engine):
-    async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
-    async with async_session_maker() as session:
-        async with session.begin_nested():
-            yield session
 
 @pytest_asyncio.fixture
 async def uow_factory(engine):
@@ -108,15 +97,3 @@ async def uow_factory(engine):
 @pytest.fixture
 def recipe_service(uow_factory):
     return RecipeService(uow_factory)
-
-# @pytest_asyncio.fixture
-# async def client():
-#     def override_uow_factory():
-#         return UnitOfWork(session_factory=lambda: db_session)
-#
-#     # app.dependency_overrides[get_service] = override_uow_factory
-#
-#     transport = ASGITransport(app=app)
-#     async with AsyncClient(transport=transport, base_url="http://test") as ac:
-#         yield ac
-#     # app.dependency_overrides = {}

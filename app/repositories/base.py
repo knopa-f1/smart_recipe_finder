@@ -41,5 +41,4 @@ class BaseRepository:
             await self.session.delete(instance)
             await self.session.flush()
             return True
-        else:
-            return False
+        return False

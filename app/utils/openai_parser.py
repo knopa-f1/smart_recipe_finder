@@ -7,7 +7,7 @@ from app.core.logger import logger
 
 
 class OpenAIQueryParser:
-    def __init__(self, api_key: str | None = None, model: str = "gpt-5"):
+    def __init__(self, model: str = "gpt-5"):
         if not settings.OPENAI_API_KEY:
             logger.warning("OpenAI API key is not set. Smart search will not work.")
             self.client = None
