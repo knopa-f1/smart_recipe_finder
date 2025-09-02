@@ -1,24 +1,27 @@
-import subprocess
 import os
 import uuid
+
 import pytest
 import pytest_asyncio
-import psycopg2
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
+from alembic import command
+from alembic.config import Config
+
+
 from app.api.schemas.enums import Difficulty
+from app.core.config import settings
 from app.db.models import Recipe
 from app.services.recipe_service import RecipeService
 from app.utils.unitofwork import UnitOfWork
-from app.core.config import settings
-from alembic.config import Config
-from alembic import command
 
 TEST_DB_NAME = f"{settings.DB_NAME}_test_{uuid.uuid4().hex[:6]}"
 ASYNC_DATABASE_URL = f"postgresql+asyncpg://{settings.DB_USER}:{settings.DB_PASS}@{settings.DB_HOST}:{settings.DB_PORT}/{TEST_DB_NAME}"
 DATABASE_URL = f"postgresql+psycopg2://{settings.DB_USER}:{settings.DB_PASS}@{settings.DB_HOST}:{settings.DB_PORT}/{TEST_DB_NAME}"
 ADMIN_URL = f"postgresql://{settings.DB_USER}:{settings.DB_PASS}@{settings.DB_HOST}:{settings.DB_PORT}/postgres"
+
 
 @pytest.fixture(scope="session", autouse=True)
 async def test_database():
@@ -94,6 +97,7 @@ async def test_database():
 
     admin_engine.dispose()
     await engine.dispose()
+
 
 # @pytest.fixture(scope="session", autouse=True)
 # def test_database():
@@ -173,6 +177,7 @@ async def engine():
 async def uow_factory(engine):
     async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
     return UnitOfWork(async_session_maker)
+
 
 @pytest.fixture
 def recipe_service(uow_factory):

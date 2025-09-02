@@ -2,11 +2,11 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
 from app.api.schemas.recipe import RecipeCreate, RecipeUpdate, RecipeOut
+from app.core.logger import logger
 from app.utils.nl_query_parser import parse_natural_query
 from app.utils.openai_parser import OpenAIQueryParser
 from app.utils.unitofwork import UnitOfWork
 
-from app.core.logger import logger
 
 class RecipeService:
     def __init__(self, uow: UnitOfWork):

@@ -1,8 +1,10 @@
 import pytest
-from app.services.recipe_service import RecipeService
-from app.api.schemas.recipe import RecipeCreate, RecipeUpdate
+
 from app.api.schemas.enums import Difficulty
+from app.api.schemas.recipe import RecipeCreate, RecipeUpdate
+from app.services.recipe_service import RecipeService
 from app.utils.openai_parser import OpenAIQueryParser
+
 
 @pytest.mark.asyncio
 async def test_create_recipe(recipe_service: RecipeService):
@@ -46,7 +48,8 @@ async def test_update_recipe(recipe_service: RecipeService):
     recipe = await recipe_service.create_recipe(recipe_in)
     recipe_id = recipe.id
 
-    updated = await recipe_service.update_recipe(recipe_id, RecipeUpdate(title="Updated Service Title", cooking_time=20))
+    updated = await recipe_service.update_recipe(recipe_id,
+                                                 RecipeUpdate(title="Updated Service Title", cooking_time=20))
     assert updated.title == "Updated Service Title"
 
 
@@ -82,6 +85,7 @@ async def test_filter_by_ingredients(recipe_service: RecipeService):
     results = await recipe_service.filter_by_ingredients(["egg", "flour"])
     assert any("egg" in r.ingredients and "flour" in r.ingredients for r in results)
 
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("query,expected", [
     ("Quick Italian recipes under 30 minutes", "Spaghetti Carbonara"),
@@ -93,8 +97,10 @@ async def test_filter_by_ingredients(recipe_service: RecipeService):
 async def test_smart_search(monkeypatch, recipe_service: RecipeService, query, expected):
     async def fake_parse(self, query: str):
         mapping = {
-            "Quick Italian recipes under 30 minutes": {"fts": "italian", "cooking_time": {"lte": 30}, "difficulty": None},
-            "Vegetarian recipes using potatoes and cheese": {"fts": "vegetarian", "cooking_time": None, "difficulty": None},
+            "Quick Italian recipes under 30 minutes": {"fts": "italian", "cooking_time": {"lte": 30},
+                                                       "difficulty": None},
+            "Vegetarian recipes using potatoes and cheese": {"fts": "vegetarian", "cooking_time": None,
+                                                             "difficulty": None},
             "What can I cook with eggs and flour?": {"fts": "egg flour", "cooking_time": None, "difficulty": None},
             "Healthy lunches with avocado": {"fts": "avocado", "cooking_time": None, "difficulty": None},
             "Recipes for beginner cooks": {"fts": "beginner", "cooking_time": None, "difficulty": Difficulty.easy},
