@@ -12,6 +12,5 @@ pylint
 pydantic
 greenlet
 spacy
-en_core_web_sm
 openai
 pytest_asyncio
