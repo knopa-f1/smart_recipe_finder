@@ -48,3 +48,13 @@ class RecipeRepository(BaseRepository):
 
         result = await self.session.execute(query)
         return result.scalars().all()
+
+    async def vector_search(self, embedding: list[float], limit: int = 5, threshold: float = 0.3):
+        stmt = (
+            select(self.model)
+            .where(Recipe.embedding.cosine_distance(embedding) < threshold)
+            .order_by(self.model.embedding.cosine_distance(embedding))
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().all()

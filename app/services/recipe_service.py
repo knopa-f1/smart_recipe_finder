@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.api.schemas.recipe import RecipeCreate, RecipeUpdate, RecipeOut
 from app.core.logger import logger
+from app.utils.embeddings import EmbeddingGenerator
 from app.utils.nl_query_parser import parse_natural_query
 from app.utils.openai_parser import OpenAIQueryParser
 from app.utils.unitofwork import UnitOfWork
@@ -12,12 +13,19 @@ class RecipeService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
         self.parser = OpenAIQueryParser()
+        self.embedder = EmbeddingGenerator()
 
     async def create_recipe(self, data: RecipeCreate) -> RecipeOut:
         logger.info("Creating recipe: %s", data.title)
+
+        text = f"{data.title} {', '.join(data.ingredients)} {data.instructions}"
+        embedding = await self.embedder.generate(text)
+        new_recipe = data.model_dump()
+        new_recipe['embedding'] = embedding
+
         async with self.uow as uow:
             try:
-                recipe = await uow.recipies.create(data.model_dump())
+                recipe = await uow.recipies.create(new_recipe)
                 await uow.commit()
                 logger.info("Recipe created with id=%s", recipe.id)
                 return RecipeOut.model_validate(recipe, from_attributes=True)
@@ -95,4 +103,13 @@ class RecipeService:
         async with self.uow as uow:
             recipes = await uow.recipies.fulltext_search(parsed_query)
             logger.info("Smart search found %s recipes", len(recipes))
+            return [RecipeOut.model_validate(r, from_attributes=True) for r in recipes]
+
+    async def vector_search(self, query: str, limit: int = 5):
+        logger.info("Performing vector search for query='%s'", query)
+        embedding = await self.embedder.generate(query)
+
+        async with self.uow:
+            recipes = await self.uow.recipies.vector_search(embedding, limit=limit)
+            logger.info("Vector search found %s recipes", len(recipes))
             return [RecipeOut.model_validate(r, from_attributes=True) for r in recipes]

@@ -90,3 +90,8 @@ async def smart_search(
             detail="OpenAI API key is not configured. Smart search is unavailable."
         )
     return await service.smart_search(q)
+
+
+@router.get("/vector_search/")
+async def vector_search(q: str, service: RecipeService = Depends(get_service)):
+    return await service.vector_search(q)

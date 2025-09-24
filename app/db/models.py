@@ -1,6 +1,7 @@
 from sqlalchemy import Integer, String, Text, Enum, ARRAY, UniqueConstraint
 from sqlalchemy.dialects.postgresql import TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column
+from pgvector.sqlalchemy import Vector
 
 from app.api.schemas.enums import Difficulty
 from app.db.database import Base
@@ -19,6 +20,7 @@ class Recipe(Base):  # pylint: disable=too-few-public-methods
     tags: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=True)
 
     search_vector: Mapped[str] = mapped_column(TSVECTOR)
+    embedding: Mapped[str] = mapped_column(Vector(1536))
 
     __table_args__ = (
         UniqueConstraint("title", "cuisine", name="uq_recipe_title_cuisine"),

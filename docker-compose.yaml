@@ -4,7 +4,7 @@ services:
     image: postgres:16
     container_name: postgres_db
     restart: always
-    command: [ "postgres", "-p", "5432" ]
+    command: ["postgres", "-c", "shared_preload_libraries=pgvector"]
     volumes:
       - postgres_data:/var/lib/postgresql/data
     expose:
@@ -15,6 +15,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: my_db
+      
 
   app:
     build:
